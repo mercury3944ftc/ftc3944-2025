@@ -9,10 +9,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.teamcode.subsystems.IntakeFeeder;
 import org.firstinspires.ftc.teamcode.subsystems.*;
-import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
@@ -28,7 +27,11 @@ public class TeleopTest extends LinearOpMode {
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "Ethernet Device");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
-        limelight.start(); // This tells Limelight to start looking!
+        limelight.start(); // This tells Limelight to start looking! //A reference to see if the camera detects anything right now
+        Pose3D posRelToGoal = null;
+        double distanceToGoal = 0;
+
+
 
         // Initialize the DC motors for each wheel
         DcMotor leftFront = hardwareMap.get(DcMotor.class, "leftFront");
@@ -90,6 +93,13 @@ public class TeleopTest extends LinearOpMode {
             //Send power to drive motors
             driveTrain.drive((double) -gamepad1.left_stick_x, (double) -gamepad1.left_stick_y, (double) -gamepad1.right_stick_x);
 
+            LLResult result = limelight.getLatestResult();
+            if (result != null && result.isValid() && !result.getFiducialResults().isEmpty())// If it does see something and it is valid
+            {
+                LLResultTypes.FiducialResult tag = result.getFiducialResults().get(0);// gets the tag of the first April Tag it detects (will change later because multiple objects can be detected)
+                posRelToGoal = tag.getCameraPoseTargetSpace(); // Gets position of camera relative to april tag
+                distanceToGoal = distanceToPoint(posRelToGoal);
+            }
             //Run intake
             if (gamepad1.x) {
                 intakeFeeder.runIntake();
@@ -109,7 +119,12 @@ public class TeleopTest extends LinearOpMode {
             }
 
             if (gamepad1.right_bumper) {
-                shooter.shoot(740); //Default velocity needed for 1 1/2 diagonal tiles way from apriltag!!!
+                double rpm = 740;
+                if (distanceToGoal != 0)
+                {
+                    rpm = RPMFunction(distanceToGoal);
+                }
+                shooter.shoot(rpm); //Default velocity needed for 1 1/2 diagonal tiles way from apriltag!!!
                 driveTrain.target(limelight);
 
             } else if (gamepad1.left_bumper) {
@@ -136,9 +151,26 @@ public class TeleopTest extends LinearOpMode {
             telemetry.addData("Shooter Right", shooter2.getCurrentPosition());
             telemetry.addData("Shooter Left RPM", shooter.getRPM());
             telemetry.addData("Shooter Coeff", shooter.getCoeff());
+            telemetry.addData("Distance To Goal", distanceToGoal);
 
             telemetry.update();
         }
     }
+
+    public double RPMFunction(double distance)
+    {
+        double rpm = distance;
+        return rpm;
+    }
+
+    double distanceToPoint(Pose3D camPose) {
+        double dx = camPose.getPosition().x;
+        double dz = camPose.getPosition().z;
+
+        return Math.sqrt(dx * dx + dz * dz);
+    }
+
+//use limelight.getbotpose to get position
+
 }
 
