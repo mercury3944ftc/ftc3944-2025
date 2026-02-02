@@ -7,47 +7,41 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 public class Shooter {
 
-    private DcMotorEx shooterLeft;
-    private DcMotorEx shooterRight;
-//    private double power = .33;
+    private DcMotorEx shooter;
+
+    //    private double power = .33;
     private boolean isRunning;
 
-    public Shooter (DcMotorEx shooterLeft, DcMotorEx shooterRight)
+    public Shooter (DcMotorEx shooter1)
     {
-        this.shooterLeft = shooterLeft;
-        this.shooterRight = shooterRight;
+        this.shooter = shooter1;
 
-        shooterLeft.setVelocityPIDFCoefficients(7,1.5,0,0.0);
-        shooterLeft.setVelocityPIDFCoefficients(7,1.5,0,0.0);
-
+        //shooter.setVelocityPIDFCoefficients(7,1.5,0,0.0);
 
     }
 
     public void shoot(double rpm)
     {
-//        shooterLeft.setPower(power);
-//        shooterRight.setPower(-power);
-        shooterLeft.setVelocity(rpm);
-        shooterRight.setVelocity(-rpm);
+
+        shooter.setVelocity(-rpm);
         isRunning = true;
 
     };
     public void stopShooting()
     {
-        shooterLeft.setPower(0);
-        shooterRight.setPower(0);
+        shooter.setPower(0);
         isRunning = false;
 
     };
 
     public String getCoeff() {
-        PIDFCoefficients coeff = shooterLeft.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+        PIDFCoefficients coeff = shooter.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
 
         return "" + coeff.p + ", " + coeff.i + ", " + coeff.d;
     }
 
     public double getRPM() {
-        return shooterLeft.getVelocity();
+        return shooter.getVelocity();
     }
 
     public boolean running(){
