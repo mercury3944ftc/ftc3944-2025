@@ -27,22 +27,22 @@ public class IntakeFeeder {
 
     public void runIntake2()
     {
-        intake2.setPower(-power);
+        intake2.setPower(power);
     };
 
 
     public void runFeeder()
     {
-        feeder.setPower(-power);
+        feeder.setPower(power);
 
     };
 
 
     public void reverse()
     {
-        feeder.setPower(power * .5);
+        feeder.setPower(-power * .5);
         intake1.setPower(-power  * .5);
-        intake2.setPower(power  * .5);
+        intake2.setPower(-power  * .5);
     }
     public void stopIntake1()
     {

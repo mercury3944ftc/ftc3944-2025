@@ -157,7 +157,7 @@ public class TeleopTest extends LinearOpMode {
             }
 
             if (gamepad1.right_bumper) {
-                double rpm = 1500;
+                double rpm = 2000;
 //                if (distanceToGoal != 0)
 //                {
 //                    rpm = RPMFunction(distanceToGoal);
